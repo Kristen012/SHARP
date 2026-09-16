@@ -1,0 +1,48 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+#ifndef NATIVE_SYSTEMC
+#include "esc.h"
+#endif
+
+#include <sys/time.h>
+
+#include "System.h"
+
+struct timeval start_time, end_time;
+
+System * sys = NULL;
+
+#ifndef NATIVE_SYSTEMC
+extern void esc_elaborate()
+{
+	sys = new System("sys");
+}
+extern void esc_cleanup()
+{
+	delete sys;
+}
+#endif
+
+int sc_main(int argc, char **argv) {
+
+#ifndef NATIVE_SYSTEMC
+	esc_initialize(argc, argv);
+#endif
+	
+#ifndef NATIVE_SYSTEMC
+	esc_elaborate();
+#else
+	sys = new System("sys");
+#endif
+	sc_start();
+#ifndef NATIVE_SYSTEMC
+	esc_cleanup();
+#else
+	delete sys;
+#endif
+	std::cout<< "Simulated time == " << sc_core::sc_time_stamp() << std::endl;
+
+  return 0;
+}
